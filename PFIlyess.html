@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ilyess Outamghart — Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0c0c0c;
+  --bg2: #141414;
+  --surface: #1a1a1a;
+  --border: #2a2a2a;
+  --green: #00ff41;
+  --green2: #00cc33;
+  --green-dim: rgba(0,255,65,0.15);
+  --amber: #ffb700;
+  --red: #ff3b3b;
+  --text: #f0f0f0;
+  --muted: #888888;
+  --font: "JetBrains Mono", monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.7;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* CURSOR */
+.cursor {
+  position: fixed; width: 2px; height: 18px;
+  background: var(--green); pointer-events: none; z-index: 9999;
+  transform: translate(-50%, -50%);
+  animation: blink-cursor 1s step-end infinite;
+}
+@keyframes blink-cursor { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* MATRIX RAIN BG */
+#matrix-canvas {
+  position: fixed; top:0; left:0; width:100%; height:100%;
+  pointer-events: none; z-index: 0; opacity: 0.045;
+}
+
+/* NAV */
+nav {
+  position: fixed; top:0; left:0; right:0; z-index: 50;
+  background: rgba(12,12,12,0.95);
+  border-bottom: 1px solid #1a1a1a;
+  padding: 0.9rem 2.5rem;
+  display: flex; align-items: center; justify-content: space-between;
+  backdrop-filter: blur(10px);
+}
+.nav-prompt {
+  font-size: 0.8rem; color: var(--green);
+  display: flex; align-items: center; gap: 0.4rem;
+}
+.nav-prompt .user { color: var(--amber); }
+.nav-prompt .at { color: var(--muted); }
+.nav-links { display: flex; gap: 0rem; list-style: none; }
+.nav-links a {
+  color: #777; text-decoration: none; font-size: 0.78rem;
+  padding: 0.3rem 0.8rem; transition: color .2s;
+  border-right: 1px solid #1a1a1a;
+}
+.nav-links a:first-child { border-left: 1px solid #1a1a1a; }
+.nav-links a:hover { color: var(--green); background: rgba(0,255,65,0.04); }
+
+/* HERO */
+#hero {
+  min-height: 100vh; display: flex; align-items: center;
+  padding: 7rem 2.5rem 4rem; position: relative; overflow: hidden; z-index: 1;
+}
+.hero-terminal {
+  background: var(--bg2); border: 1px solid #222;
+  border-radius: 8px; width: 100%; max-width: 860px;
+  box-shadow: 0 0 60px rgba(0,255,65,0.06);
+}
+.terminal-bar {
+  background: #1a1a1a; padding: 0.7rem 1rem;
+  border-bottom: 1px solid #222; border-radius: 8px 8px 0 0;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.dot { width: 12px; height: 12px; border-radius: 50%; }
+.dot.r { background: #ff5f57; }
+.dot.y { background: #febc2e; }
+.dot.g { background: #28c840; }
+.terminal-title {
+  margin-left: auto; margin-right: auto;
+  font-size: 0.7rem; color: var(--muted);
+  transform: translateX(-20px);
+}
+.terminal-body { padding: 2rem 2.5rem 2.5rem; font-size: 0.88rem; line-height: 1.9; }
+.t-line { display: flex; align-items: flex-start; gap: 0.6rem; margin-bottom: 0.5rem; font-size: 0.82rem; }
+.prompt { color: var(--green); white-space: nowrap; }
+.prompt .user { color: var(--amber); }
+.prompt .path { color: #4488ff; }
+.cmd { color: var(--text); }
+.output { padding-left: 1.2rem; margin-bottom: 1rem; }
+.output-line { font-size: 0.88rem; color: #aaaaaa; line-height: 2; }
+.output-line .val { color: var(--text); }
+.output-line .str { color: #ce9178; }
+.output-line .key { color: #9cdcfe; }
+.output-line .num { color: var(--amber); }
+.output-line .green { color: var(--green); }
+
+.big-name {
+  font-family: "Syne", sans-serif;
+  font-size: clamp(2.8rem, 6vw, 5.5rem); font-weight: 800;
+  line-height: 1; letter-spacing: -0.03em; color: var(--green);
+  text-shadow: 0 0 40px rgba(0,255,65,0.3);
+  margin: 0.5rem 0 0.3rem;
+}
+.big-name .white { color: var(--text); }
+
+.t-cursor {
+  display: inline-block; width: 10px; height: 1.1em;
+  background: var(--green); vertical-align: text-bottom;
+  animation: blink-cursor 1s step-end infinite; margin-left: 3px;
+}
+
+/* SECTIONS */
+section { padding: 6rem 2.5rem; position: relative; z-index: 1; }
+#about, #experience, #contact { background: var(--bg2); }
+#skills, #projects { background: var(--bg); }
+
+.section-header { margin-bottom: 2.5rem; }
+.section-cmd {
+  font-size: 1.1rem; color: var(--green); margin-bottom: 0.5rem;
+  display: flex; align-items: center; gap: 0.6rem;
+}
+.section-cmd .prompt-mini { color: var(--amber); }
+.section-comment { font-size: 0.8rem; color: #444444; margin-bottom: 1.5rem; }
+
+/* ABOUT */
+.about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start; }
+.code-block {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 6px; padding: 1.8rem; font-size: 0.83rem; line-height: 2.1;
+}
+.code-block .ln { color: #333; user-select: none; margin-right: 1.2rem; display: inline-block; width: 20px; text-align: right; }
+.code-block .kw { color: #c586c0; }
+.code-block .fn { color: #dcdcaa; }
+.code-block .str { color: #ce9178; }
+.code-block .comment { color: #4a4a4a; }
+.code-block .prop { color: #9cdcfe; }
+.code-block .bool { color: var(--amber); }
+.code-block .grn { color: var(--green); }
+
+.info-table { display: flex; flex-direction: column; gap: 0; }
+.info-tr {
+  display: flex; align-items: center;
+  border-bottom: 1px solid var(--border); padding: 0.9rem 0;
+  font-size: 0.85rem; transition: background .2s;
+}
+.info-tr:hover { background: rgba(0,255,65,0.03); padding-left: 0.5rem; }
+.info-td-key { color: #888; width: 130px; flex-shrink: 0; }
+.info-td-val { color: var(--text); }
+.info-td-val.green { color: var(--green); }
+
+/* SKILLS */
+.skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap: 1rem; }
+.skill-window {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 6px; overflow: hidden;
+  transition: border-color .3s, transform .3s;
+}
+.skill-window:hover { border-color: rgba(0,255,65,0.3); transform: translateY(-4px); }
+.skill-window-bar {
+  background: #1a1a1a; padding: 0.5rem 0.8rem;
+  display: flex; align-items: center; gap: 0.4rem;
+  border-bottom: 1px solid var(--border);
+}
+.skill-window-title { font-size: 0.68rem; color: var(--muted); margin-left: 0.4rem; }
+.skill-window-body { padding: 1.2rem; }
+.skill-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.6rem; }
+.stag {
+  font-size: 0.72rem; padding: 0.3rem 0.7rem;
+  border-radius: 3px; font-family: var(--font);
+}
+.stag.g { background: rgba(0,255,65,0.08); color: var(--green); border: 1px solid rgba(0,255,65,0.2); }
+.stag.b { background: rgba(68,136,255,0.08); color: #4488ff; border: 1px solid rgba(68,136,255,0.2); }
+.stag.r { background: rgba(255,59,59,0.08); color: var(--red); border: 1px solid rgba(255,59,59,0.2); }
+.stag.a { background: rgba(255,183,0,0.08); color: var(--amber); border: 1px solid rgba(255,183,0,0.2); }
+
+/* EXPERIENCE */
+.exp-block { margin-bottom: 2.8rem; border-bottom: 1px solid #1e1e1e; padding-bottom: 2rem; }
+.exp-file {
+  font-size: 0.78rem; color: var(--muted); margin-bottom: 0.8rem;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.exp-file::before { content: "📄"; font-size: 0.8rem; }
+.exp-title { font-size: 1.05rem; color: var(--text); font-weight: 700; margin-bottom: 0.2rem; }
+.exp-company { font-size: 0.84rem; color: #4488ff; margin-bottom: 0.7rem; }
+.exp-list { list-style: none; }
+.exp-list li {
+  font-size: 0.84rem; color: #999999; line-height: 2;
+  padding-left: 1.2rem; position: relative;
+}
+.exp-list li::before { content: "#"; position: absolute; left: 0; color: var(--green); }
+
+/* PROJECTS */
+.proj-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px,1fr)); gap: 1rem; }
+.proj-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 6px; padding: 1.5rem;
+  transition: border-color .3s, transform .3s;
+  position: relative; overflow: hidden;
+}
+.proj-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--green), transparent);
+  transform: scaleX(0); transition: transform .4s;
+}
+.proj-card:hover { border-color: rgba(0,255,65,0.25); transform: translateY(-4px); }
+.proj-card:hover::before { transform: scaleX(1); }
+.proj-year { font-size: 0.68rem; color: var(--amber); margin-bottom: 0.6rem; }
+.proj-title { font-size: 1.05rem; color: var(--text); font-weight: 700; margin-bottom: 0.5rem; }
+.proj-desc { font-size: 0.84rem; color: #999999; line-height: 1.8; margin-bottom: 1rem; }
+
+/* CONTACT */
+.contact-inner { max-width: 640px; margin: 0 auto; }
+.contact-prompt { font-size: 0.92rem; color: #999; margin-bottom: 2.5rem; line-height: 1.8; }
+.contact-prompt .green { color: var(--green); }
+.contact-btns { display: flex; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 2rem; }
+.c-btn {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.75rem 1.4rem; font-family: var(--font); font-size: 0.72rem;
+  border-radius: 4px; text-decoration: none; border: 1px solid var(--border);
+  color: var(--text); background: var(--surface); transition: all .2s; cursor: pointer;
+}
+.c-btn:hover { border-color: var(--green); color: var(--green); background: rgba(0,255,65,0.05); }
+
+/* FOOTER */
+footer {
+  padding: 1.5rem 2.5rem; border-top: 1px solid var(--border);
+  display: flex; justify-content: space-between; font-size: 0.68rem;
+  color: var(--muted); z-index: 1; position: relative;
+}
+.footer-green { color: var(--green); }
+
+/* REVEAL */
+.reveal { opacity:0; transform:translateY(20px); transition: opacity .6s, transform .6s; }
+.reveal.visible { opacity:1; transform:translateY(0); }
+
+@media(max-width:768px){
+  nav { padding: .8rem 1.2rem; }
+  .nav-links { display: none; }
+  section { padding: 3.5rem 1.2rem; }
+  #hero { padding: 6rem 1.2rem 3rem; }
+  .about-grid { grid-template-columns: 1fr; }
+  .terminal-body { padding: 1.2rem; }
+  .big-name { font-size: 2.5rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<canvas id="matrix-canvas"></canvas>
+
+<nav>
+  <div class="nav-prompt">
+    <span class="user">ilyess</span>
+    <span class="at">@</span>
+    <span>portfolio</span>
+    <span style="color:var(--muted)">:~$</span>
+    <span style="color:var(--text);margin-left:4px">_</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#about">about</a></li>
+    <li><a href="#skills">skills</a></li>
+    <li><a href="#experience">exp</a></li>
+    <li><a href="#projects">projects</a></li>
+    <li><a href="#contact">contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-terminal">
+    <div class="terminal-bar">
+      <div class="dot r"></div>
+      <div class="dot y"></div>
+      <div class="dot g"></div>
+      <div class="terminal-title">ilyess@portfolio: ~</div>
+    </div>
+    <div class="terminal-body">
+      <div class="t-line">
+        <span class="prompt"><span class="user">ilyess</span>@portfolio:~$</span>
+        <span class="cmd">whoami</span>
+      </div>
+      <div class="output">
+        <div class="big-name"><span class="white">ILYESS </span>OUTAMGHART</div>
+      </div>
+
+      <div class="t-line">
+        <span class="prompt"><span class="user">ilyess</span>@portfolio:~$</span>
+        <span class="cmd">cat status.txt</span>
+      </div>
+      <div class="output">
+        <div class="output-line"><span class="green">●</span> <span class="val">BTS SIO SISR — 1ère année</span></div>
+        <div class="output-line"><span class="green">●</span> Alternant Technicien Informatique</div>
+        <div class="output-line"><span class="green">●</span> Disponible pour alternance : <span class="val">septembre 2026</span></div>
+      </div>
+
+      <div class="t-line">
+        <span class="prompt"><span class="user">ilyess</span>@portfolio:~$</span>
+        <span class="cmd">echo $SPECIALITE</span>
+      </div>
+      <div class="output">
+        <div class="output-line"><span class="str">"Systèmes & Réseaux · Cybersécurité · Hardware"</span></div>
+      </div>
+
+      <div class="t-line">
+        <span class="prompt"><span class="user">ilyess</span>@portfolio:~$</span>
+        <span class="cmd" id="typing-cmd"></span><span class="t-cursor"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="section-header reveal">
+    <div class="section-cmd"><span class="prompt-mini">$</span> cat about.json</div>
+    <div class="section-comment">// Fichier de configuration — profil utilisateur</div>
+  </div>
+  <div class="about-grid">
+    <div class="code-block reveal">
+<span class="ln">1</span><span class="kw">const</span> <span class="fn">ilyess</span> = {<br>
+<span class="ln">2</span>&nbsp;&nbsp;<span class="prop">nom</span>: <span class="str">"Outamghart Ilyess"</span>,<br>
+<span class="ln">3</span>&nbsp;&nbsp;<span class="prop">age</span>: <span class="num">20</span>,<br>
+<span class="ln">4</span>&nbsp;&nbsp;<span class="prop">passion</span>: <span class="str">"Informatique depuis 2019"</span>,<br>
+<span class="ln">5</span>&nbsp;&nbsp;<span class="prop">formation</span>: <span class="str">"BTS SIO SISR"</span>,<br>
+<span class="ln">6</span>&nbsp;&nbsp;<span class="prop">ecole</span>: <span class="str">"BPC-ESC Freyming-Merlebach"</span>,<br>
+<span class="ln">7</span>&nbsp;&nbsp;<span class="prop">langues</span>: [<span class="str">"Français"</span>, <span class="str">"Anglais"</span>, <span class="str">"Arabe"</span>],<br>
+<span class="ln">8</span>&nbsp;&nbsp;<span class="prop">autodidacte</span>: <span class="bool">true</span>,<br>
+<span class="ln">9</span>&nbsp;&nbsp;<span class="prop">disponible</span>: <span class="str">"Septembre 2026"</span>,<br>
+<span class="ln">10</span>&nbsp;&nbsp;<span class="prop">objectif</span>: <span class="str">"Cybersécurité & Infra"</span>,<br>
+<span class="ln">11</span>&nbsp;&nbsp;<span class="comment">// Hardware + Software : les deux</span><br>
+<span class="ln">12</span>&nbsp;&nbsp;<span class="prop">loisirs</span>: [<span class="str">"Boxe anglaise"</span>, <span class="str">"Auto"</span>]<br>
+<span class="ln">13</span>}<br>
+    </div>
+    <div class="reveal">
+      <div class="info-table">
+        <div class="info-tr"><span class="info-td-key">formation</span><span class="info-td-val">BTS SIO SISR — 1ère année</span></div>
+        <div class="info-tr"><span class="info-td-key">école</span><span class="info-td-val">BPC-ESC, Freyming-Merlebach</span></div>
+        <div class="info-tr"><span class="info-td-key">disponible</span><span class="info-td-val green">Septembre 2026</span></div>
+        <div class="info-tr"><span class="info-td-key">téléphone</span><span class="info-td-val">07 82 41 30 25</span></div>
+        <div class="info-tr"><span class="info-td-key">langues</span><span class="info-td-val">Français · Anglais · Arabe</span></div>
+        <div class="info-tr"><span class="info-td-key">loisirs</span><span class="info-td-val">Boxe anglaise · Automobile</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="section-header reveal">
+    <div class="section-cmd"><span class="prompt-mini">$</span> ls -la skills/</div>
+    <div class="section-comment">// total 6 modules chargés</div>
+  </div>
+  <div class="skills-grid">
+    <div class="skill-window reveal">
+      <div class="skill-window-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="skill-window-title">systemes-os.sh</span></div>
+      <div class="skill-window-body">
+        <div style="font-size:0.78rem;color:#888;margin-bottom:0.6rem"># OS & Virtualisation</div>
+        <div class="skill-tags">
+          <span class="stag g">Windows Server</span><span class="stag g">Ubuntu</span>
+          <span class="stag g">Debian</span><span class="stag g">Arch Linux</span>
+          <span class="stag g">Proxmox</span><span class="stag g">Virtualisation</span>
+        </div>
+      </div>
+    </div>
+    <div class="skill-window reveal">
+      <div class="skill-window-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="skill-window-title">cybersec.sh</span></div>
+      <div class="skill-window-body">
+        <div style="font-size:0.78rem;color:#888;margin-bottom:0.6rem"># Sécurité informatique</div>
+        <div class="skill-tags">
+          <span class="stag r">Kali Linux</span><span class="stag r">Nmap</span>
+          <span class="stag r">Sécurité réseau</span>
+        </div>
+      </div>
+    </div>
+    <div class="skill-window reveal">
+      <div class="skill-window-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="skill-window-title">reseaux.cfg</span></div>
+      <div class="skill-window-body">
+        <div style="font-size:0.78rem;color:#888;margin-bottom:0.6rem"># Infrastructure réseau</div>
+        <div class="skill-tags">
+          <span class="stag b">Packet Tracer</span><span class="stag b">TCP/IP</span>
+          <span class="stag b">VLAN</span><span class="stag b">DNS/DHCP</span>
+        </div>
+      </div>
+    </div>
+    <div class="skill-window reveal">
+      <div class="skill-window-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="skill-window-title">dev.py</span></div>
+      <div class="skill-window-body">
+        <div style="font-size:0.78rem;color:#888;margin-bottom:0.6rem"># Langages & développement</div>
+        <div class="skill-tags">
+          <span class="stag a">Python</span><span class="stag a">Java</span>
+          <span class="stag a">C / C++</span><span class="stag a">HTML/CSS</span>
+          <span class="stag a">Arduino</span>
+        </div>
+      </div>
+    </div>
+    <div class="skill-window reveal">
+      <div class="skill-window-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="skill-window-title">hardware.log</span></div>
+      <div class="skill-window-body">
+        <div style="font-size:0.78rem;color:#888;margin-bottom:0.6rem"># Matériel & réparation</div>
+        <div class="skill-tags">
+          <span class="stag g">Diagnostic pannes</span><span class="stag g">Soudure</span>
+          <span class="stag g">Micro-soudure</span><span class="stag g">Composants PC</span>
+        </div>
+      </div>
+    </div>
+    <div class="skill-window reveal">
+      <div class="skill-window-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><span class="skill-window-title">admin-it.conf</span></div>
+      <div class="skill-window-body">
+        <div style="font-size:0.78rem;color:#888;margin-bottom:0.6rem"># Administration IT</div>
+        <div class="skill-tags">
+          <span class="stag b">Active Directory</span><span class="stag b">Gestion de parc</span>
+          <span class="stag b">Support IT</span><span class="stag b">Serveurs</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EXPERIENCE -->
+<section id="experience">
+  <div class="section-header reveal">
+    <div class="section-cmd"><span class="prompt-mini">$</span> cat experience.log</div>
+    <div class="section-comment">// Historique des processus — trié par date DESC</div>
+  </div>
+
+  <div class="exp-block reveal">
+    <div class="exp-file">2025 — 2026 &nbsp;·&nbsp; PID: 001</div>
+    <div class="exp-title">Technicien Informatique — Alternance</div>
+    <div class="exp-company">Centre Technique · Forbach</div>
+    <ul class="exp-list">
+      <li>Maintenance hardware : diagnostic pannes, remplacement de composants</li>
+      <li>Soudure et micro-soudure sur cartes électroniques</li>
+      <li>Administration systèmes Windows & Linux au quotidien</li>
+      <li>Mise à jour logicielle et gestion de parc informatique</li>
+    </ul>
+  </div>
+
+  <div class="exp-block reveal">
+    <div class="exp-file">2024 — 2025 &nbsp;·&nbsp; PID: 002</div>
+    <div class="exp-title">Stagiaire — Maintenance électronique & réseaux</div>
+    <div class="exp-company">Centre Technique de Forbach</div>
+    <ul class="exp-list">
+      <li>Maintenance systèmes de sécurité, serveurs et réseaux électriques</li>
+      <li>Réalisation de devis techniques</li>
+      <li>Gestion des équipements pour les équipes terrain</li>
+    </ul>
+  </div>
+
+  <div class="exp-block reveal">
+    <div class="exp-file">2021 &nbsp;·&nbsp; PID: 003</div>
+    <div class="exp-title">Stagiaire — Support Informatique</div>
+    <div class="exp-company">Pharmacie de Saint-Avold</div>
+    <ul class="exp-list">
+      <li>Administration d'un outil interne de gestion de médicaments</li>
+      <li>Support logiciel aux utilisateurs</li>
+      <li>Gestion des stocks et reporting quotidien</li>
+    </ul>
+  </div>
+
+  <div class="exp-block reveal">
+    <div class="exp-file">2021 — 2022 &nbsp;·&nbsp; PID: 004</div>
+    <div class="exp-title">Entraîneur de Boxe</div>
+    <div class="exp-company">Cercle Pugilistique Forbachois · Forbach</div>
+    <ul class="exp-list">
+      <li>Encadrement et coaching de jeunes sportifs</li>
+      <li>Communication, pédagogie, leadership</li>
+    </ul>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="section-header reveal">
+    <div class="section-cmd"><span class="prompt-mini">$</span> ls projects/ --details</div>
+    <div class="section-comment">// 4 entrées trouvées</div>
+  </div>
+  <div class="proj-grid">
+    <div class="proj-card reveal">
+      <div class="proj-year">2024 · infrastructure/</div>
+      <div class="proj-title">Infrastructure Serveurs</div>
+      <p class="proj-desc">Mise en place et administration d'une infrastructure serveur complète via Oracle. Configuration, déploiement et gestion.</p>
+      <div class="skill-tags"><span class="stag b">Oracle</span><span class="stag g">Windows Server</span><span class="stag g">Virtualisation</span></div>
+    </div>
+    <div class="proj-card reveal">
+      <div class="proj-year">2022 · web/</div>
+      <div class="proj-title">Site Web</div>
+      <p class="proj-desc">Développement d'un site web from scratch. Apprentissage des fondamentaux frontend en autonomie complète.</p>
+      <div class="skill-tags"><span class="stag a">HTML</span><span class="stag a">CSS</span></div>
+    </div>
+    <div class="proj-card reveal">
+      <div class="proj-year">2021 · scripts/</div>
+      <div class="proj-title">Programmation Python</div>
+      <p class="proj-desc">Projets de programmation procédurale. Initiation à Kali Linux et environnements Ubuntu/Debian en parallèle.</p>
+      <div class="skill-tags"><span class="stag a">Python</span><span class="stag r">Kali Linux</span><span class="stag g">Ubuntu</span></div>
+    </div>
+    <div class="proj-card reveal">
+      <div class="proj-year">2019 → now · /veille</div>
+      <div class="proj-title">Veille & Autoformation</div>
+      <p class="proj-desc">Veille techno continue : cybersécurité, RGPD, IA, infrastructures IT. Apprendre par la pratique en continu.</p>
+      <div class="skill-tags"><span class="stag r">Cybersécurité</span><span class="stag b">IA</span><span class="stag g">RGPD</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-header reveal">
+    <div class="section-cmd"><span class="prompt-mini">$</span> ./contact.sh</div>
+    <div class="section-comment">// Initialisation du canal de communication...</div>
+  </div>
+  <div class="contact-inner reveal">
+    <div class="contact-prompt">
+      <span class="green">[INFO]</span> Je cherche une alternance pour ma 2e année de BTS SIO SISR — septembre 2026.<br>
+      <span class="green">[INFO]</span> Une opportunité ou une question ? Lancez une connexion.
+    </div>
+    <div class="contact-btns">
+      <a href="tel:0782413025" class="c-btn">📞 07 82 41 30 25</a>
+      <button class="c-btn" id="emailBtn" onclick="(function(){var b=document.getElementById('emailBtn');if(b.dataset.r){try{navigator.clipboard.writeText('outamghartilyess575@gmail.com')}catch(e){}b.textContent='✓ Copié !';setTimeout(function(){b.textContent='✉️ outamghartilyess575@gmail.com';},2000);}else{b.dataset.r='1';b.textContent='✉️ outamghartilyess575@gmail.com';b.style.borderColor='#00ff41';b.style.color='#00ff41';}})()">✉️ Email</button>
+      <a href="https://www.linkedin.com/in/ilyess-outamghart-01228a326/" target="_blank" class="c-btn">🔗 LinkedIn</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>© 2026 <span class="footer-green">Ilyess Outamghart</span></span>
+  <span>BTS SIO SISR <span class="footer-green">·</span> exit 0</span>
+</footer>
+
+<script>
+// Cursor
+const cur = document.getElementById('cursor');
+document.addEventListener('mousemove', e => {
+  cur.style.left = e.clientX + 'px';
+  cur.style.top  = e.clientY + 'px';
+});
+
+// Matrix rain
+const canvas = document.getElementById('matrix-canvas');
+const ctx = canvas.getContext('2d');
+canvas.width  = window.innerWidth;
+canvas.height = window.innerHeight;
+window.addEventListener('resize', () => { canvas.width=window.innerWidth; canvas.height=window.innerHeight; drops=[]; init(); });
+const chars = "01アイウエオカキクケコサシスセソタチツテトナニヌネノ";
+const fs = 13; let cols, drops;
+function init() {
+  cols = Math.floor(canvas.width / fs); drops = Array(cols).fill(1);
+}
+init();
+function drawMatrix() {
+  ctx.fillStyle = 'rgba(12,12,12,0.05)';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle = '#00ff41'; ctx.font = fs+'px JetBrains Mono, monospace';
+  drops.forEach((y,i) => {
+    ctx.fillText(chars[Math.floor(Math.random()*chars.length)], i*fs, y*fs);
+    if(y*fs > canvas.height && Math.random() > 0.975) drops[i] = 0;
+    drops[i]++;
+  });
+}
+setInterval(drawMatrix, 50);
+
+// Typing effect
+const cmds = ['./connect.sh --job', 'ssh ilyess@alternance-2026', 'sudo find / -name "opportunite"'];
+let ci=0, li=0;
+const el = document.getElementById('typing-cmd');
+function type() {
+  if(li < cmds[ci].length) {
+    el.textContent += cmds[ci][li++];
+    setTimeout(type, 80);
+  } else {
+    setTimeout(() => { el.textContent=''; li=0; ci=(ci+1)%cmds.length; type(); }, 2500);
+  }
+}
+setTimeout(type, 1500);
+
+// Scroll reveal
+const obs = new IntersectionObserver(e => e.forEach(x => { if(x.isIntersecting) x.target.classList.add('visible'); }), {threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
